@@ -1,49 +1,77 @@
 #!/bin/python 
 
+'''
+    A python script for generating nexus files and running Mr. Bayes.    
+'''
+
 import sys 
-from os import listdir
+import os
 
+def CreateNexus(LineList, OutName):
+    MrBayesOut = os.path.splitext(OutName)[0]
+    command = ["\nbegin mrbayes;", "\n\texecute %s;"%OutName, "\n\tsetautoclose=yes\
+nowarn=yes;", "\n\tprsetbrlenspr=clock:uniform;",\
+    "\n\tprsetstatefreqpr=dirichlet(1,1,1,1);", "\n\tlsetnst=2 rates=gamma\
+Ngammacat=4;", "\n\tmcmcngen=110000  Stoprule=yes Stopval=0.01 relburnin=\
+yes burninfrac=0.25 samplefreq=100;", "\n\tsumt filename=%s Nruns=2\
+Contype=Allcompat;"%MrBayesOut, "\nquit;\nend;"]
 
+    with open(OutName, 'w') as outfile:
+        outfile.write("#NEXUS\n\n")
+        outfile.write(''.join(LineList))
+        outfile.write(''.join(command))
 
+#Define variables from program arguments 
+infolder = sys.argv[1] #Argument 1 = input folder  
+try: #Test for the presence of an optional outfolder argument
+    assert len(sys.argv) == 3
+    outfolder = sys.argv[2] #Argument 2 = output folder
+except AssertionError:
+    outfolder = infolder #There is no second argument, output will go in the input folder 
 
-#read in list of files here 
+#Make a list of all sequence files in the input folder 
+SQList = [x for x in os.listdir(infolder) if "_Seq" in x]
 
-[prog name, infolder, outfolder]
+'''
+Nexus files for running Mr. Bayes are generated in this loop. 
+'''
 
+for sequenceFile in SQList: #Loop through the sequence file list
+    STnum = sequenceFile.split("_")[2] #Extract the species tree number from the file name 
+    sequencePath = os.path.join(infolder, sequenceFile)
+    with open(sequencePath, 'r') as infile: #Open the sequence file for reading
+        blackhole=[infile.readline() for x in xrange(17)] #Read the first 18 lines of the equence file, we don't need these 
+        #Check if we read too many lines into the blackhole 
+        for headerline in blackhole:
+            if "Begin DATA;" in headerline:
+                print "I discarded too many lines from the header of your \
+                sequence file. Please open me and fix the xrange(#) in line 28."
+                exit(1)
+            else: # loop through the remaining lins in the sequence file and build the nexus files 
+                line = True
+                while line:
+                    line = infile.readline()
+                    if "Begin DATA" in line: #check to see if the line is the beginning of a new sequence block 
+                        TreeNameSplit = line.split(";")[1].strip()
+                        treeName = ''.join(TreeNameSplit[1:len(TreeNameSplit)-1].split(' ')) #get the tree number from the Begin Data line
+                        outFileName = os.path.join(outfolder, treeName + "_" + STnum + ".nex") # concatonate the output directory name with the output file name 
+                        Nexuslist=[line] #Lines to be written in the Nexus file will be stored here
+                        while True: #append lines to the nexus file list until you reach the end of the sequence block
+                            line = infile.readline()
+                            Nexuslist.extend(line)
+                            if line.strip().strip('\n') == "END;":
+                                CreateNexus(Nexuslist, outFileName)
+                                print "Sucessfully wrote nexus file for block %s from file %s." %(treeName, sequenceFile)  
+                                break
+                            else:
+                                continue
 
-myfolder = sys.argv[1] 
-#name of folder 
-outfolder = sys.argv[2]
+ 
+NEXUSList = [x for x in os.listdir(outfolder) if ".nex" in x] #create a list of the nexus files written to the output directory
 
-
-MAKE A LIST OF _SEQ FILES 
-SQList = [x for x in listdir(myfolder) if "_Seq" in x]
-
-#loop through a folder of sequence block files 
-for myfile in SQList:
-    STnum = myfile.split("_")[2]
-    with open(myfile, 'r') as infile:
-        #read the header of the file 
-        blackhole=[infile.next() for x in xrange(18)]
-            
-        #start looping on lines containing sequences
-        for line in infile:
-            test = line 
-            if "Begin DATA" in test: 
-                #create tmp
-                treeName = test.split(";")[1].strip()[1:len(tmp)-1]
-                outFileName = myfolder + treeName + "_" + STnum + ".nex"
-                CREATE THE MR. BAYES FILE NAME FROM NEXUS NAME 
-                "begin mrbayes;\nexecute temp.nex;\nset autoclose=yes nowarn=yes;\nprset brlenspr=clock:uniform;\nprset statefreqpr=dirichlet(1,1,1,1);\nlset  nst=2  rates=gamma Ngammacat=4;\nmcmc ngen=110000  Stoprule=yes Stopval=0.01 relburnin=yes burninfrac=0.25 samplefreq=100;\nsumt filename=%s AND STNUM Nruns=2 Contype=Allcompat;\nquit;\nend;" %THIS IS THE FILE NAME 
-                with open(outFile, 'w') as outfile:
-                    #write the matrix to the outfile                             
-            if test == "END;":
-                # stop witing to output file 
-                print "we reached the end of block %s" %treeName 
-
-#create list of nexus files 
-for file in some list of nexus files: 
-    #run mr bays   
-    mb execute nameoffile       
+for NexusFile in NEXUSList:
+    NexusPath = os.path.join(outfolder, NexusFile)
+    os.system("mb %s" %NexusPath) #run mr bays   
+    print "Mr. BayEs ran sucessfully from file %s" %NexusFile       
     
 

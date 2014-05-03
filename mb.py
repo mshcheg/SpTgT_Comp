@@ -9,12 +9,11 @@ import os
 
 def CreateNexus(LineList, OutName):
     MrBayesOut = os.path.splitext(OutName)[0]
-    command = ["\nbegin mrbayes;", "\n\texecute %s;"%OutName, "\n\tsetautoclose=yes\
-nowarn=yes;", "\n\tprsetbrlenspr=clock:uniform;",\
-    "\n\tprsetstatefreqpr=dirichlet(1,1,1,1);", "\n\tlsetnst=2 rates=gamma\
-Ngammacat=4;", "\n\tmcmcngen=110000  Stoprule=yes Stopval=0.01 relburnin=\
-yes burninfrac=0.25 samplefreq=100;", "\n\tsumt filename=%s Nruns=2\
-Contype=Allcompat;"%MrBayesOut, "\nquit;\nend;"]
+    command = ["\nbegin mrbayes;", "\n\tset autoclose=yes \
+nowarn=yes;", "\n\tprset brlenspr=clock:uniform;",\
+    "\n\tprset statefreqpr=dirichlet(1,1,1,1);", "\n\tlset nst=2 rates=gamma \
+Ngammacat=4;", "\n\tmcmc ngen=110000  Stoprule=yes Stopval=0.01 relburnin=\
+yes burninfrac=0.25 samplefreq=100;", "sumt Nruns=2 Contype=Allcompat;", "\n\tfilename=%s;"%MrBayesOut, "\nquit;\nend;"]
 
     with open(OutName, 'w') as outfile:
         outfile.write("#NEXUS\n\n")

@@ -7,7 +7,8 @@
 
 import sys 
 import os
-from random import randint
+#from random import randint 
+#did not end up using random numbers, built up the concatonated files in the order they were encounted in the input directory  
 
 def CreateNexus(SequenceList, OutName, nchar):
     MrBayesOut = os.path.splitext(OutName)[0]

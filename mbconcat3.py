@@ -26,9 +26,18 @@ def CreateNexus(SequenceList, OutName, nchar):
 
 def ReadFile(currentNexusFile):
     blackhole = [currentNexusFile.readline() for x in xrange(6)] #Read the first 6 lines of the nexus file, we don't need these 
-    SequenceList = [currentNexusFile.readline().strip("\n") for x in xrange(8)] #Read the 8 sequence lines from the nexus file
+    SequenceList = [] 
+    #Read the sequence lines from the nexus file
+    line = True
+    while line:
+        line = currentNexusFile.readline().strip("\n")
+        if line.strip() == ";":
+            break
+        else:
+            SequenceList.append(line)
+ 
     SplitSequenceList = [(x.split()[0], [x.split()[1]]) for x in SequenceList] 
-    
+  
     return SplitSequenceList
 
 #Define variables from program arguments 

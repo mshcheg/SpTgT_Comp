@@ -40,6 +40,24 @@ def ReadFile(currentNexusFile):
   
     return SplitSequenceList
 
+def LoopThroughNexusList(List, infolder):	
+	SpTreeName = List[0][0].split("_")[1].split(".")[0]
+	concatonatedSequenceDictionary={}	
+	for item in List:
+		for nexusFile in item:
+ 			nexusPath = os.path.join(infolder, nexusFile)
+			with open(nexusPath, 'r') as currentNexusFile:		
+				SplitSequenceList = ReadFile(currentNexusFile)  
+            	if item.index(nexusFile) == 0:
+					concatonatedSequenceDictionary = dict(SplitSequenceList)                
+            	else:
+                	for pair in SplitSequenceList:
+						concatonatedSequenceDictionary[pair[0]].extend(pair[1])
+		linelist=[]
+        for lineNum, sequences in concatonatedSequenceDictionary.items():
+            linelist.append('%s %s\n'%(lineNum,''.join(sequences)))
+        CreateNexus(linelist, outFileName, sequenceLength)
+		
 #Define variables from program arguments 
 infolder = sys.argv[1] #Argument 1 = input folder  
 try: #Test for the presence of an optional outfolder argument
@@ -56,77 +74,31 @@ NexusList3 = [NexusList[counter-3:counter] for counter in range(3,len(NexusList)
 NexusList9 = [NexusList[counter-9:counter] for counter in range(9,len(NexusList)+9,9)]
 NexusList27 = [NexusList[counter-27:counter] for counter in range(27,len(NexusList)+27,27)]
 
-SpTreeName = NexusList[0].split("_")[1].split(".")[0]
+#LoopThroughNexusList(NexusList3, infolder)
+#LoopThroughNexusList(NexusList9, infolder)
+#LoopThroughNexusList(NexusList27, infolder)
+
+SpTreeName = NexusList3[0][0].split("_")[1].split(".")[0]
+concatonatedSequenceDictionary={}	
+for item in NexusList9:
+	for nexusFile in item:
+		nexusPath = os.path.join(infolder, nexusFile)
+		with open(nexusPath, 'r') as currentNexusFile:		
+			SplitSequenceList = ReadFile(currentNexusFile)
+			print SplitSequenceList
+           	if item.index(nexusFile) == 0:
+				concatonatedSequenceDictionary = dict(SplitSequenceList)                
+           	else:
+				for pair in SplitSequenceList:
+					concatonatedSequenceDictionary[pair[0]].extend(pair[1])
+		linelist=[]
+		for lineNum, sequences in concatonatedSequenceDictionary.items():
+			linelist.append('%s %s\n'%(lineNum,''.join(sequences)))
+		CreateNexus(linelist, outFileName, sequenceLength)
 
 #concatonatedSequenceDictionary={}
 #Continue loop by threes (and modify script/additional scripts for looping by 9s and by 27s)
 #For concatenating by 3s, consider e.g. Tree1_ST1.nex Tree2_ST1.nex and Tree3_ST1.nex - then the next three
-
-def LoopThroughNexusList(List, infolder):
-	counter = 0	
-	concatonatedSequenceDictionary={}	
-	for item in List:
-		for NexusFile in item:
-			counter+=1
-			if counter = 1
- 				nexusPath = os.path.join(infolder, nexusFile)
-            	with open(nexusPath, 'r') as currentNexusFile:		
-                	SplitSequenceList = ReadFile(currentNexusFile)  
-            	if NextthreeFiles.index(nexusFile) == 0:
-                	concatonatedSequenceDictionary = dict(SplitSequenceList)                
-            	else:
-                	for pair in SplitSequenceList:
-                	    concatonatedSequenceDictionary[pair[0]].extend(pair[1])
-        linelist = []
-        for lineNum, sequences in concatonatedSequenceDictionary.items():
-            linelist.append('%s %s\n'%(lineNum,''.join(sequences)))
-        CreateNexus(linelist, outFileName, sequenceLength)
-    	else:
-        	for nexusFile in NextthreeFiles:
-            	nexusPath = os.path.join(infolder, nexusFile)
-            	with open(nexusPath, 'r') as currentNexusFile:		
-                	SplitSequenceList = ReadFile(currentNexusFile)  
-            	for pair in SplitSequenceList:
-                	concatonatedSequenceDictionary[pair[0]].extend(pair[1])
-        linelist = []
-        for lineNum, sequences in concatonatedSequenceDictionary.items():
-            linelist.append('%s %s\n'%(lineNum,''.join(sequences)))
-        #Save new mrbayes file as, e.g. Tree1x3_ST1.nex
-        CreateNexus(linelist, outFileName, sequenceLength)
-
-
-for counter in range(3,len(NexusList)+3,3):
-    NextthreeFiles = NexusList[counter-3:counter]
-    outFileName = os.path.join(outfolder, "Tree%sx%s_%s.nex"%(1, counter, SpTreeName))
-    #Change nchar to 3000 for concatenating by 3s (to 9000 for 9s, to 27000 for 27s)
-    sequenceLength = counter*1000
-    #Add species sequences for Tree2 and Tree3, paying attention to species (signified by 1, 2,...8)
-    if counter == 3:		
-        for nexusFile in NextthreeFiles:
-            nexusPath = os.path.join(infolder, nexusFile)
-            with open(nexusPath, 'r') as currentNexusFile:		
-                SplitSequenceList = ReadFile(currentNexusFile)  
-            if NextthreeFiles.index(nexusFile) == 0:
-                concatonatedSequenceDictionary = dict(SplitSequenceList)                
-            else:
-                for pair in SplitSequenceList:
-                    concatonatedSequenceDictionary[pair[0]].extend(pair[1])
-        linelist = []
-        for lineNum, sequences in concatonatedSequenceDictionary.items():
-            linelist.append('%s %s\n'%(lineNum,''.join(sequences)))
-        CreateNexus(linelist, outFileName, sequenceLength)
-    else:
-        for nexusFile in NextthreeFiles:
-            nexusPath = os.path.join(infolder, nexusFile)
-            with open(nexusPath, 'r') as currentNexusFile:		
-                SplitSequenceList = ReadFile(currentNexusFile)  
-            for pair in SplitSequenceList:
-                concatonatedSequenceDictionary[pair[0]].extend(pair[1])
-        linelist = []
-        for lineNum, sequences in concatonatedSequenceDictionary.items():
-            linelist.append('%s %s\n'%(lineNum,''.join(sequences)))
-        #Save new mrbayes file as, e.g. Tree1x3_ST1.nex
-        CreateNexus(linelist, outFileName, sequenceLength)
 
 '''
 This is an optional block of code to run Mr. Bayes for the concatonated nexus files. Uncomment it if you want to run Mr. Bayes as part of this script.
